@@ -1,0 +1,83 @@
+####################################################
+# GVS (GENERIC VEHICLE SERVICE) 2017 FIXED VERSION #
+#              ALL CREDIT TO JACMAC                #
+#             ORIGNINAL IS HOSTED HERE             #
+#    http://www.armaholic.com/page.php?id=19735    #
+####################################################
+
+Installation/ Usage:
+0. Copy the gvs directory into your mission folder.
+1. Create marker(s) on the map.
+2. Name the marker(s) gvs_veh_x, gvs_hel_x, and/or gvs_pla_x where x = some number (e.g. gvs_hel_0 is a helecopter service point).
+3. Uniquely name vehicles as desired.
+4. Run the mission
+
+Requirements:
+gvs_init.sqf	GVS initialization
+gvs_triggers.sqf	Generates triggers from markers
+gvs_watcher.sqf Delays use (reuse) of service points
+sounds.sqf	Sound utility functions
+cfg_lookup.sqf Utility functions
+simple_text_control.sqf Display/Dialog control for structured text
+colors_include.hpp Color definitions
+control_include.hpp	Standard control includes
+stc_include.hpp	Simple text display control definitions
+Misc sound files (.ogg files included)
+
+Add the following into your mission's description.ext:
+#include "gvs\colors_include.hpp"
+  #include "gvs\control_include.hpp"
+  #include "gvs\stc_include.hpp"
+Add the following into your mission's init.sqf:
+execVM "gvs\gvs_init.sqf";
+
+To use GVS:
+0. Copy the gvs directory into your mission folder.
+1. Create marker(s) on the map.
+2. Name the marker(s) gvs_veh_x, gvs_hel_x, gvs_uav_x and/or gvs_pla_x where x = some number (e.g. gvs_hel_0 is a helecopter service point).
+3. Uniquely name vehicles as desired.
+4. Run the mission
+
+Display Information:
+GVS uses RscTitles for the information display. It is very possible that missions you try to integrate GVS into will also use RscTitles. By default layer 301 is used for GVS, you can change it if you happen to be using 301 already, numbers in the tens of thousands have been tested successfully. I you integrate GVS into a mission that is already utilizing RscTitles, for example "Domination", you will have to integrate the display class definitions. For example, in the Domination description.ext consider the following code:
+class RscTitles {
+	#include "x_dlg\RscTitles.hpp"
+	#include "gvs\stc_include_alt.hpp" //Alterntive display class definitions
+	};
+The display location and background color can be changed by altering the _display_Settings variable
+Text colors can also be altered by changing the constants through out the code prefixed with 'RGB'
+Colors can be found in colors_include.hpp
+
+Additional Notes:
+REQUIREMENT: Your vehicles must be uniquely named. GVS uses the names of vehicles to control re-use of a GVS trigger.
+This means if you put 10 Hunters on the map all named "BigHunter1", the first one to use a GVS will lock all of the others out until the re-use timer expires for "BigHunter1". For script spawned vehicles you will need to implement something like this if you want them to be able to use a GVS trigger:
+
+Example 1:
+_kh60_Pos = [3962,4618];
+_veh = "O_Ka60_F" createVehicle _kh60_Pos;
+_varName="ka60_1";	// <----This must be unique per vehicle
+_veh SetVehicleVarName _varName;
+_veh Call Compile Format ["%1=_this ; PublicVariable ""%1""",_varName];
+
+Example 2:
+_xloc = (floor ((random 100) + 3950));
+_yloc = (floor ((random 50) + 4550));
+_veh = "B_Quadbike_F" createVehicle [_xloc,_yloc];
+Global_QUAD = Global_QUAD + 1;
+_varName=("Quadbike_" + (str Global_QUAD)); // <----This must be unique per vehicle
+_veh SetVehicleVarName _varName;
+_veh Call Compile Format ["%1=_this ; PublicVariable ""%1""",_varName];
+
+Long term re-use of a trigger is controlled per vehicle instead of per player, this is a major change from the previous version.
+Each trigger you set up with GVS needs a public variable associated with it and these need to be initialized in init.sqf.
+The public variables prevent the GVS trigger from being immediately used by anyone or any vehicle on the server, while
+it is currently in use. This prevents scenarios where one player triggers GVS, then get out of a vehicle and another
+player gets in the same vehicle and causes a second triggering of the GVS (this was seen to cause problems).
+
+The default time for re-using a trigger has been changed to 200 seconds in gvs_watcher.sqf. A player can possibly trigger
+two or more vehicles to use various GVS triggers for different vehicle if they are all in close proximity, this can mean
+that the display of the information will get a little wonky, but everything will function normally as far as the vehicles
+rearming and repairing.
+
+Example mission:
+The included test mission called GVS_Test_Mission.Stratis has been updated. In the test mission, simply land on the helipad or drive the vehicle into the coned area.
