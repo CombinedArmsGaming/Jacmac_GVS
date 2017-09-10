@@ -25,10 +25,13 @@ stc_include.hpp	Simple text display control definitions
 Misc sound files (.ogg files included)
 
 Add the following into your mission's description.ext:
+
 #include "gvs\colors_include.hpp"
-  #include "gvs\control_include.hpp"
-  #include "gvs\stc_include.hpp"
+#include "gvs\control_include.hpp"
+#include "gvs\stc_include.hpp"
+
 Add the following into your mission's init.sqf:
+
 execVM "gvs\gvs_init.sqf";
 
 To use GVS:
